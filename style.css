@@ -1,0 +1,26 @@
+body {
+    font-size: 30pt;
+    margin-left: 100;
+    }
+li {
+    margin: 30px 0;
+    }
+a {
+    text-decoration: none;
+    color: black;
+    }
+a:hover {
+    color: blue;
+    }
+table {
+	font-size: 40;
+	border: 2px solid black;
+	border-collapse: collapse;
+}
+td {
+	border: 2px solid black;
+	padding: 7px;
+}
+tr {
+	text-align: center;
+}
