@@ -1,61 +1,39 @@
 function f(x,A,b) {
     return x.T().mult(A).mult(x).mult(1/2).get(1)+b.mult(x);
 }
-function df(x,A,b) {
-    return A.mult(x).sum(b);
-}
-function ddf(x,A,b) {
-    return A;
-}
 
-function L(x,y,x0,r,A,b) {
-    return f(x,A,b)+y*(x.dif(x0).mult(x.dif(x0))-r*r);
-}
-
-function dL(x,y,x0,A,b,r) {
+function L(y,A,b,x0) {
     var I = new Matrix('1',A.size.n);
-    var l =  A.sum(I.mult(2*y)).mult(x).sum(b).sum(x0.mult(-2*y));
-    l.vector_push(x.dif(x0).mult(x.dif(x0))-r*r);
-    return l;
+    var x = A.sum(I.mult(2*y)).invert().mult(x0).mult(2*y);
+    return {
+        x: x,
+        f: f(x,A,b) 
+    };
 }
 
-function W_(x0,x,y,A) {
-    var n = A.size.n;
-    var I = new Matrix('1',n);
-    var W = new Matrix('0',n+1,n+1);
-    var A2I = A.sum(I.mult(2*y));
-    var xx0 = x.dif(x0).mult(2);
-    for(var i = 1; i<=n; i++) {
-        for(var j = 1; j<=n; j++) {
-            W.set(i,j,A2I.get(i,j));
-        }
+var A = Matrix.random(4,4,-5,5,0);
+A = A.mult(A.T());
+var b = Matrix.random(4,1,-5,5,0);
+var x0 = Matrix.random(4,1,-5,5,0);
+var r = 10;
+var t = [];
+var solution = {};
+
+for(var y = 0; y<=5; y+=0.01) {
+    t.push(L(y,A,b,x0));
+}
+
+for(var i = 0; i<t.length-1; i++) {
+    if((t[i+1].f>t[i].f)&&(t[i].x.dif(x0).vector_norm(2)<=r)) {
+        solution.x = t[i].x;
+        solution.f = t[i].f;
+        break;
     }
-    for(var i = 1; i<=n; i++) {
-        W.set(i,n+1,xx0.get(i));
-        W.set(n+1,i,xx0.get(i));
-    }
-    return W;
 }
 
-function step(xk_,x0_,A,b,r) {
-    var x0 = x0_.copy();
-    var xk = xk_.copy();
-    var y = xk.vector_pop();
-    x0.vector_pop();
-    var W = W_(x0,xk,y,A);
-    return xk_.dif(W.mult(dL(xk,y,x0,A,b,r)));
-}
-
-var A = new Matrix('array',[[20,-18,-4,6],[-18,8,4,2],[-4,4,20,-6],[6,2,-6,12]]);
-var b = new Matrix('vector',[9,3,8,10]);
-var x = [new Matrix('vector',[2,7,-3,8])];
-var r = 15;
-
-x[0].vector_push(0);
-
-for(var i = 1; i<=3; i++) {
-    x.length++;
-    x[i] = step(x[i-1],x[0],A,b,r);
-}
-
-x[x.length-1].log()
+var html = '<br><br>'
++'\\(f_0(x) = x^T '+A.tex()+' x + '
++b.tex()+' x \\)<br><br>'
++'Оптимальное решение: \\(x^* = '+solution.x.tex(5)
++',~~~f_0(x^*) = '+solution.f+'\\)';
+document.body.innerHTML = html;

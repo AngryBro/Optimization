@@ -80,5 +80,4 @@ var html = '<br><br>'
 .replace('\\leq','\\geq')+',~~~'
 +'p^* = '+p.tex(5)+'\\)'
 ;
-
 document.body.innerHTML = html;
